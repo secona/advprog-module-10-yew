@@ -13,17 +13,14 @@ pub fn login() -> Html {
 
     let oninput = {
         let current_username = username.clone();
+        let user = user.clone();
 
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();
-            current_username.set(input.value());
+            let value = input.value();
+            current_username.set(value.clone());
+            *user.username.borrow_mut() = value;
         })
-    };
-
-    let onclick = {
-        let username = username.clone();
-        let user = user.clone();
-        Callback::from(move |_| *user.username.borrow_mut() = (*username).clone())
     };
 
     html! {
@@ -31,7 +28,9 @@ pub fn login() -> Html {
             <div class="container mx-auto flex flex-col justify-center items-center">
                 <form class="m-4 flex">
                     <input {oninput} class="rounded-l-lg p-4 border-t mr-0 border-b border-l text-gray-800 border-gray-200 bg-white" placeholder="Username" />
-                    <Link<Route> to={Route::Chat}> <button {onclick} disabled={username.len()<1} class="px-8 rounded-r-lg bg-violet-600	  text-white font-bold p-4 uppercase border-violet-600 border-t border-b border-r" >{"Go Chatting!"}</button></Link<Route>>
+                    <Link<Route> to={Route::Chat}>
+                        <button disabled={username.len()<1} class="px-8 rounded-r-lg bg-violet-600 text-white font-bold p-4 uppercase border-violet-600 border-t border-b border-r" >{"Go Chatting!"}</button>
+                    </Link<Route>>
                 </form>
             </div>
         </div>

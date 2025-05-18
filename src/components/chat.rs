@@ -93,7 +93,7 @@ impl Component for Chat {
                             .map(|u| UserProfile {
                                 name: u.into(),
                                 avatar: format!(
-                                    "https://avatars.dicebear.com/api/adventurer-neutral/{}.svg",
+                                    "https://api.dicebear.com/9.x/initials/svg?seed={}",
                                     u
                                 )
                                 .into(),
@@ -138,6 +138,13 @@ impl Component for Chat {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let submit = ctx.link().callback(|_| Msg::SubmitMessage);
 
+        let user = ctx
+            .link()
+            .context::<User>(Callback::noop())
+            .expect("No user context");
+
+        let current_username = user.0.username.borrow().clone();
+
         html! {
             <div class="flex w-screen">
                 <div class="flex-none w-56 h-screen bg-gray-100">
@@ -168,8 +175,19 @@ impl Component for Chat {
                         {
                             self.messages.iter().map(|m| {
                                 let user = self.users.iter().find(|u| u.name == m.from).unwrap();
+
+                                // Check if this message is from the current user
+                                let is_current_user = m.from == current_username;
+
+                                // Conditionally set class for flex row direction
+                                let container_class = if is_current_user {
+                                    "flex items-end w-3/6 bg-gray-100 m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg flex-row-reverse"
+                                } else {
+                                    "flex items-end w-3/6 bg-gray-100 m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg"
+                                };
+
                                 html!{
-                                    <div class="flex items-end w-3/6 bg-gray-100 m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg ">
+                                    <div class={container_class}>
                                         <img class="w-8 h-8 rounded-full m-3" src={user.avatar.clone()} alt="avatar"/>
                                         <div class="p-3">
                                             <div class="text-sm">
